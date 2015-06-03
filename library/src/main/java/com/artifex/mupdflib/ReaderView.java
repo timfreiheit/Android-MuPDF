@@ -107,6 +107,21 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 		mScaleType = scaleType;
 	}
 
+    /**
+     * @return current scale
+     */
+    public float getScale(){
+        return mScale;
+    }
+
+    /**
+     * @param scale
+     */
+    public void setScale(float scale){
+        mScale = scale;
+        requestLayout();
+    }
+
 	public int getDisplayedViewIndex() {
 		return mCurrent;
 	}
