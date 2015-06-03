@@ -11,6 +11,24 @@ import android.view.View;
 import android.view.WindowManager;
 
 public class MuPDFReaderView extends ReaderView {
+
+	public interface MuPDFReaderListener {
+
+		void onTabMainContent();
+
+        /**
+         * called when an external link is clicked
+         */
+        void onLinkClicked(String url);
+
+        void onDocMotion(float distanceX, float distanceY);
+
+        void onHit(Hit item);
+
+        void onMoveToChild(int i);
+
+	}
+
 	public enum Mode {Viewing, Selecting, Drawing}
 	//enum Mode {Viewing, Selecting, Drawing}
 
@@ -20,13 +38,45 @@ public class MuPDFReaderView extends ReaderView {
 	private boolean tapDisabled = false;
 	private int tapPageMargin;
 
-	protected void onTapMainDocArea() {
+	private MuPDFReaderListener mMuPDFReaderListener;
+
+	protected void onExternalLinkClicked(LinkInfoExternal li){
+		if (mMuPDFReaderListener != null) {
+            mMuPDFReaderListener.onLinkClicked(li.url);
+		} else {
+			Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(li.url));
+			mContext.startActivity(intent);
+		}
 	}
 
-	protected void onDocMotion() {
+	protected void onInternalLinkClicked(LinkInfoInternal li){
+		// Clicked on an internal (GoTo) link
+		//TODO: goto page in landscape mode
+		setDisplayedViewIndex(li.pageNumber);
+	}
+
+	public void setMuPDFReaderListener(MuPDFReaderListener listener){
+        mMuPDFReaderListener = listener;
+	}
+
+	protected boolean onTapMainDocArea() {
+		if (mMuPDFReaderListener != null) {
+            mMuPDFReaderListener.onTabMainContent();
+			return true;
+		}
+		return false;
+	}
+
+	protected void onDocMotion(float distanceX, float distanceY) {
+        if (mMuPDFReaderListener != null) {
+            mMuPDFReaderListener.onDocMotion(distanceX,distanceY);
+        }
 	}
 
 	protected void onHit(Hit item) {
+        if (mMuPDFReaderListener != null) {
+            mMuPDFReaderListener.onHit(item);
+        }
 	};
 
 	public void setLinksHighlighted(boolean b) {
@@ -77,7 +127,7 @@ public class MuPDFReaderView extends ReaderView {
 	}
 
 	public boolean onSingleTapUp(MotionEvent e) {
-		LinkInfo link = null;
+		LinkInfo link;
 
 		if (mMode == Mode.Viewing && !tapDisabled) {
 			MuPDFView pageView = (MuPDFView) getDisplayedView();
@@ -88,15 +138,12 @@ public class MuPDFReaderView extends ReaderView {
 					link.acceptVisitor(new LinkInfoVisitor() {
 						@Override
 						public void visitInternal(LinkInfoInternal li) {
-							// Clicked on an internal (GoTo) link
-							//TODO: goto page in landscape mode
-							setDisplayedViewIndex(li.pageNumber);
+							onInternalLinkClicked(li);
 						}
 
 						@Override
 						public void visitExternal(LinkInfoExternal li) {
-							Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(li.url));
-							mContext.startActivity(intent);
+							onExternalLinkClicked(li);
 						}
 
 						@Override
@@ -104,26 +151,19 @@ public class MuPDFReaderView extends ReaderView {
 							// Clicked on a remote (GoToR) link
 						}
 					});
+					return true;
 				} else if (e.getX() < tapPageMargin) {
 					super.smartMoveBackwards();
+					return true;
 				} else if (e.getX() > super.getWidth() - tapPageMargin) {
 					super.smartMoveForwards();
-				//} else if (e.getY() < tapPageMargin) {
-				//	super.smartMoveBackwards();
-				//} else if (e.getY() > super.getHeight() - tapPageMargin) {
-				//	super.smartMoveForwards();
+					return true;
 				} else {
-					onTapMainDocArea();
+					return onTapMainDocArea();
 				}
 			}
 		}
 		return super.onSingleTapUp(e);
-	}
-
-	@Override
-	public boolean onDown(MotionEvent e) {
-		
-		return super.onDown(e);
 	}
 
 	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
@@ -131,7 +171,7 @@ public class MuPDFReaderView extends ReaderView {
 		switch (mMode) {
 		case Viewing:
 			if (!tapDisabled)
-				onDocMotion();
+				onDocMotion(distanceX,distanceY);
 
 			return super.onScroll(e1, e2, distanceX, distanceY);
 		case Selecting:
@@ -251,10 +291,13 @@ public class MuPDFReaderView extends ReaderView {
 	}
 
 	protected void onMoveToChild(int i) {
-		if (SearchTaskResult.get() != null && SearchTaskResult.get().pageNumber != i) {
+        if (SearchTaskResult.get() != null && SearchTaskResult.get().pageNumber != i) {
 			SearchTaskResult.set(null);
 			resetupChildren();
 		}
+        if (mMuPDFReaderListener != null) {
+            mMuPDFReaderListener.onMoveToChild(i);
+        }
 	}
 
 	@Override

@@ -518,17 +518,18 @@ public class MuPDFActivity extends Activity implements FilePicker.FilePickerSupp
 			}
 
 			@Override
-			protected void onTapMainDocArea() {
+			protected boolean onTapMainDocArea() {
 				if (!mButtonsVisible) {
 					showButtons();
 				} else {
 					if (mTopBarMode == TopBarMode.Main)
 						hideButtons();
 				}
+                return super.onTapMainDocArea();
 			}
 
 			@Override
-			protected void onDocMotion() {
+			protected void onDocMotion(float distanceX, float distanceY) {
 				hideButtons();
 			}
 
