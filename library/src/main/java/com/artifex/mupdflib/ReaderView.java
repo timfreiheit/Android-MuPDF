@@ -18,7 +18,7 @@ import java.util.NoSuchElementException;
 
 public class ReaderView extends AdapterView<Adapter> implements GestureDetector.OnGestureListener,
 		GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener, Runnable {
-	
+
 	private static final int MOVING_DIAGONALLY = 0;
 	private static final int MOVING_LEFT = 1;
 	private static final int MOVING_RIGHT = 2;
@@ -31,7 +31,7 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 	private static final float MIN_SCALE = 0.97f;
 	private static final float MAX_SCALE = 4.0f;
 	private static final float REFLOW_SCALE_FACTOR = 0.5f;
-	
+
 	private boolean HORIZONTAL_SCROLLING = true;
 
 	private Adapter mAdapter;
@@ -55,10 +55,11 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 	private int mScrollerLastX;
 	private int mScrollerLastY;
 	//private boolean mScrollDisabled;
-	
+
 	private float mLastScaleFocusX;
 	private float mLastScaleFocusY;
 
+	private ScaleType mScaleType = ScaleType.FIT_CENTER;
 
 	static abstract class ViewMapper {
 		abstract void applyToView(View view);
@@ -72,18 +73,15 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 		//mStepper = new Stepper(this, this);
 		// "Edit mode" means when the View is being displayed in the Android GUI editor. (this class
 		// is instantiated in the IDE, so we need to be a bit careful what we do).
-		if (isInEditMode())
-		{
+		if (isInEditMode()) {
 			mGestureDetector = null;
 			mScaleGestureDetector = null;
 			mScroller = null;
 			mStepper = null;
-		}
-		else
-		{
+		} else {
 			mGestureDetector = new GestureDetector(this);
 			mScaleGestureDetector = new ScaleGestureDetector(context, this);
-			mScroller        = new Scroller(context);
+			mScroller = new Scroller(context);
 			mStepper = new Stepper(this, this);
 		}
 
@@ -103,6 +101,10 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 		mScaleGestureDetector = new ScaleGestureDetector(context, this);
 		mScroller = new Scroller(context);
 		mStepper = new Stepper(this, this);
+	}
+
+	public void setScaleType(ScaleType scaleType){
+		mScaleType = scaleType;
 	}
 
 	public int getDisplayedViewIndex() {
@@ -367,16 +369,24 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 	}
 
 	protected void onSettle(View v) {
-	};
+	}
+
+	;
 
 	protected void onUnsettle(View v) {
-	};
+	}
+
+	;
 
 	protected void onNotInUse(View v) {
-	};
+	}
+
+	;
 
 	protected void onScaleChild(View v, Float scale) {
-	};
+	}
+
+	;
 
 	public View getView(int i) {
 		return mChildViews.get(i);
@@ -412,7 +422,7 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 	}
 
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-			float velocityY) {
+						   float velocityY) {
 		//if (mScrollDisabled)
 		if (mScaling)
 			return true;
@@ -421,50 +431,50 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 		if (v != null) {
 			Rect bounds = getScrollBounds(v);
 			switch (directionOfTravel(velocityX, velocityY)) {
-			case MOVING_LEFT:
-				if (HORIZONTAL_SCROLLING && bounds.left >= 0) {
-					// Fling off to the left bring next view onto screen
-					View vl = mChildViews.get(mCurrent + 1);
+				case MOVING_LEFT:
+					if (HORIZONTAL_SCROLLING && bounds.left >= 0) {
+						// Fling off to the left bring next view onto screen
+						View vl = mChildViews.get(mCurrent + 1);
 
-					if (vl != null) {
-						slideViewOntoScreen(vl);
-						return true;
+						if (vl != null) {
+							slideViewOntoScreen(vl);
+							return true;
+						}
 					}
-				}
-				break;
-			case MOVING_UP:
-				if (!HORIZONTAL_SCROLLING && bounds.top >= 0) {
-					// Fling off to the top bring next view onto screen
-					View vl = mChildViews.get(mCurrent+1);
+					break;
+				case MOVING_UP:
+					if (!HORIZONTAL_SCROLLING && bounds.top >= 0) {
+						// Fling off to the top bring next view onto screen
+						View vl = mChildViews.get(mCurrent + 1);
 
-					if (vl != null) {
-						slideViewOntoScreen(vl);
-						return true;
+						if (vl != null) {
+							slideViewOntoScreen(vl);
+							return true;
+						}
 					}
-				}
-				break;
-			case MOVING_RIGHT:
-				if (HORIZONTAL_SCROLLING && bounds.right <= 0) {
-					// Fling off to the right bring previous view onto screen
-					View vr = mChildViews.get(mCurrent - 1);
+					break;
+				case MOVING_RIGHT:
+					if (HORIZONTAL_SCROLLING && bounds.right <= 0) {
+						// Fling off to the right bring previous view onto screen
+						View vr = mChildViews.get(mCurrent - 1);
 
-					if (vr != null) {
-						slideViewOntoScreen(vr);
-						return true;
+						if (vr != null) {
+							slideViewOntoScreen(vr);
+							return true;
+						}
 					}
-				}
-				break;
-			case MOVING_DOWN:
-				if (!HORIZONTAL_SCROLLING && bounds.bottom <= 0) {
-					// Fling off to the bottom bring previous view onto screen
-					View vr = mChildViews.get(mCurrent-1);
+					break;
+				case MOVING_DOWN:
+					if (!HORIZONTAL_SCROLLING && bounds.bottom <= 0) {
+						// Fling off to the bottom bring previous view onto screen
+						View vr = mChildViews.get(mCurrent - 1);
 
-					if (vr != null) {
-						slideViewOntoScreen(vr);
-						return true;
+						if (vr != null) {
+							slideViewOntoScreen(vr);
+							return true;
+						}
 					}
-				}
-				break;
+					break;
 			}
 			mScrollerLastX = mScrollerLastY = 0;
 			// If the page has been dragged out of bounds then we want to spring
@@ -498,7 +508,7 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 	}
 
 	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
-			float distanceY) {
+							float distanceY) {
 		//if (!mScrollDisabled) {
 		if (!mScaling) {
 			mXScroll -= distanceX;
@@ -542,20 +552,20 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 				// Work out the focus point relative to the view top left
 				//int viewFocusX = (int) detector.getFocusX() - (v.getLeft() + mXScroll);
 				//int viewFocusY = (int) detector.getFocusY() - (v.getTop() + mYScroll);
-				int viewFocusX = (int)currentFocusX - (v.getLeft() + mXScroll);
-				int viewFocusY = (int)currentFocusY - (v.getTop() + mYScroll);
+				int viewFocusX = (int) currentFocusX - (v.getLeft() + mXScroll);
+				int viewFocusY = (int) currentFocusY - (v.getTop() + mYScroll);
 				// Scroll to maintain the focus point
 				mXScroll += viewFocusX - viewFocusX * factor;
 				mYScroll += viewFocusY - viewFocusY * factor;
-				
 
-				if (mLastScaleFocusX>=0)
-					mXScroll+=currentFocusX-mLastScaleFocusX;
-				if (mLastScaleFocusY>=0)
-					mYScroll+=currentFocusY-mLastScaleFocusY;
 
-				mLastScaleFocusX=currentFocusX;
-				mLastScaleFocusY=currentFocusY;
+				if (mLastScaleFocusX >= 0)
+					mXScroll += currentFocusX - mLastScaleFocusX;
+				if (mLastScaleFocusY >= 0)
+					mYScroll += currentFocusY - mLastScaleFocusY;
+
+				mLastScaleFocusX = currentFocusX;
+				mLastScaleFocusY = currentFocusY;
 
 				requestLayout();
 			}
@@ -593,7 +603,7 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 		mScaleGestureDetector.onTouchEvent(event);
 
 		//if (!mScaling)
-			mGestureDetector.onTouchEvent(event);
+		mGestureDetector.onTouchEvent(event);
 
 		//if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
 		if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN) {
@@ -636,7 +646,7 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right,
-			int bottom) {
+							int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
 
 		// "Edit mode" means when the View is being displayed in the Android GUI editor. (this class
@@ -656,9 +666,9 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 				// so add left to the measured width for the correct position
 				//if (cv.getLeft() + cv.getMeasuredWidth() + cvOffset.x + GAP / 2 + mXScroll < getWidth() / 2 && mCurrent + 1 < mAdapter.getCount()) {
 				if (HORIZONTAL_SCROLLING)
-					move = cv.getLeft() + cv.getMeasuredWidth() + cvOffset.x + GAP/2 + mXScroll < getWidth()/2;
+					move = cv.getLeft() + cv.getMeasuredWidth() + cvOffset.x + GAP / 2 + mXScroll < getWidth() / 2;
 				else
-					move = cv.getTop() + cv.getMeasuredHeight() + cvOffset.y + GAP/2 + mYScroll < getHeight()/2;
+					move = cv.getTop() + cv.getMeasuredHeight() + cvOffset.y + GAP / 2 + mYScroll < getHeight() / 2;
 				if (move && mCurrent + 1 < mAdapter.getCount()) {
 					postUnsettle(cv);
 					// post to invoke test for end of animation
@@ -672,9 +682,9 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 
 				//if (cv.getLeft() - cvOffset.x - GAP / 2 + mXScroll >= getWidth() / 2 && mCurrent > 0) {
 				if (HORIZONTAL_SCROLLING)
-					move = cv.getLeft() - cvOffset.x - GAP/2 + mXScroll >= getWidth()/2;
+					move = cv.getLeft() - cvOffset.x - GAP / 2 + mXScroll >= getWidth() / 2;
 				else
-					move = cv.getTop() - cvOffset.y - GAP/2 + mYScroll >= getHeight()/2;
+					move = cv.getTop() - cvOffset.y - GAP / 2 + mYScroll >= getHeight() / 2;
 				if (move && mCurrent > 0) {
 					postUnsettle(cv);
 					// post to invoke test for end of animation
@@ -755,7 +765,7 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 			cvLeft += corr.x;
 			cvTop += corr.y;
 			cvBottom += corr.y;
-		//} else if (cv.getMeasuredHeight() <= getHeight()) {
+			//} else if (cv.getMeasuredHeight() <= getHeight()) {
 		} else if (HORIZONTAL_SCROLLING && cv.getMeasuredHeight() <= getHeight()) {
 			// When the current view is as small as the screen in height, clamp
 			// it vertically
@@ -766,8 +776,8 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 			// When the current view is as small as the screen in width, clamp
 			// it horizontally
 			Point corr = getCorrection(getScrollBounds(cvLeft, cvTop, cvRight, cvBottom));
-			cvRight  += corr.x;
-			cvLeft   += corr.x;
+			cvRight += corr.x;
+			cvLeft += corr.x;
 		}
 
 		cv.layout(cvLeft, cvTop, cvRight, cvBottom);
@@ -779,15 +789,14 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 			//lv.layout(cvLeft - lv.getMeasuredWidth() - gap,
 			//		(cvBottom + cvTop - lv.getMeasuredHeight()) / 2, cvLeft - gap,
 			//		(cvBottom + cvTop + lv.getMeasuredHeight()) / 2);
-			if (HORIZONTAL_SCROLLING)
-			{
+			if (HORIZONTAL_SCROLLING) {
 				int gap = leftOffset.x + GAP + cvOffset.x;
-				lv.layout(cvLeft - lv.getMeasuredWidth() - gap, (cvBottom + cvTop - lv.getMeasuredHeight())/2,
-						cvLeft - gap, (cvBottom + cvTop + lv.getMeasuredHeight())/2);
+				lv.layout(cvLeft - lv.getMeasuredWidth() - gap, (cvBottom + cvTop - lv.getMeasuredHeight()) / 2,
+						cvLeft - gap, (cvBottom + cvTop + lv.getMeasuredHeight()) / 2);
 			} else {
 				int gap = leftOffset.y + GAP + cvOffset.y;
-				lv.layout((cvLeft + cvRight - lv.getMeasuredWidth())/2, cvTop - lv.getMeasuredHeight() - gap,
-						(cvLeft + cvRight + lv.getMeasuredWidth())/2, cvTop - gap);
+				lv.layout((cvLeft + cvRight - lv.getMeasuredWidth()) / 2, cvTop - lv.getMeasuredHeight() - gap,
+						(cvLeft + cvRight + lv.getMeasuredWidth()) / 2, cvTop - gap);
 			}
 		}
 
@@ -798,15 +807,14 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 			//rv.layout(cvRight + gap,
 			//		(cvBottom + cvTop - rv.getMeasuredHeight()) / 2, cvRight + rv.getMeasuredWidth() + gap,
 			//		(cvBottom + cvTop + rv.getMeasuredHeight()) / 2);
-			if (HORIZONTAL_SCROLLING)
-			{
+			if (HORIZONTAL_SCROLLING) {
 				int gap = cvOffset.x + GAP + rightOffset.x;
-				rv.layout(cvRight + gap, (cvBottom + cvTop - rv.getMeasuredHeight())/2,
-						cvRight + rv.getMeasuredWidth() + gap, (cvBottom + cvTop + rv.getMeasuredHeight())/2);
+				rv.layout(cvRight + gap, (cvBottom + cvTop - rv.getMeasuredHeight()) / 2,
+						cvRight + rv.getMeasuredWidth() + gap, (cvBottom + cvTop + rv.getMeasuredHeight()) / 2);
 			} else {
 				int gap = cvOffset.y + GAP + rightOffset.y;
-				rv.layout((cvLeft + cvRight - rv.getMeasuredWidth())/2, cvBottom + gap,
-						(cvLeft + cvRight + rv.getMeasuredWidth())/2, cvBottom + gap + rv.getMeasuredHeight());
+				rv.layout((cvLeft + cvRight - rv.getMeasuredWidth()) / 2, cvBottom + gap,
+						(cvLeft + cvRight + rv.getMeasuredWidth()) / 2, cvBottom + gap + rv.getMeasuredHeight());
 			}
 		}
 
@@ -836,7 +844,7 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 	public void setSelection(int arg0) {
 		throw new UnsupportedOperationException(getContext().getString(R.string.not_supported));
 	}
-	
+
 	public void setScrollingDirectionHorizontal(boolean horizontalScrolling) {
 		HORIZONTAL_SCROLLING = horizontalScrolling;
 	}
@@ -875,9 +883,26 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 		v.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
 
 		if (!mReflow) {
-			// Work out a scale that will fit it to this view
-			float scale = Math.min((float) getWidth() / (float) v.getMeasuredWidth(),
-					(float) getHeight() / (float) v.getMeasuredHeight());
+
+			float scale;
+			switch (mScaleType){
+				case CENTER_CROP:
+					scale = Math.max((float) getWidth() / (float) v.getMeasuredWidth(),
+							(float) getHeight() / (float) v.getMeasuredHeight());
+					break;
+				case FIT_HEIGHT:
+					scale = (float) getHeight() / (float) v.getMeasuredHeight();
+					break;
+				case FIT_WIDTH:
+					scale = (float) getWidth() / (float) v.getMeasuredWidth();
+					break;
+				case FIT_CENTER:
+				default:
+					// Work out a scale that will fit it to this view
+					scale = Math.min((float) getWidth() / (float) v.getMeasuredWidth(),
+							(float) getHeight() / (float) v.getMeasuredHeight());
+					break;
+			}
 			// Use the fitting values scaled by our current scale factor
 			v.measure(MeasureSpec.EXACTLY | (int) (v.getMeasuredWidth() * scale * mScale),
 					MeasureSpec.EXACTLY | (int) (v.getMeasuredHeight() * scale * mScale));
@@ -959,20 +984,20 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 	}
 
 	private static boolean withinBoundsInDirectionOfTravel(Rect bounds,
-			float vx, float vy) {
+														   float vx, float vy) {
 		switch (directionOfTravel(vx, vy)) {
-		case MOVING_DIAGONALLY:
-			return bounds.contains(0, 0);
-		case MOVING_LEFT:
-			return bounds.left <= 0;
-		case MOVING_RIGHT:
-			return bounds.right >= 0;
-		case MOVING_UP:
-			return bounds.top <= 0;
-		case MOVING_DOWN:
-			return bounds.bottom >= 0;
-		default:
-			throw new NoSuchElementException();
+			case MOVING_DIAGONALLY:
+				return bounds.contains(0, 0);
+			case MOVING_LEFT:
+				return bounds.left <= 0;
+			case MOVING_RIGHT:
+				return bounds.right >= 0;
+			case MOVING_UP:
+				return bounds.top <= 0;
+			case MOVING_DOWN:
+				return bounds.bottom >= 0;
+			default:
+				throw new NoSuchElementException();
 		}
 	}
 
@@ -986,19 +1011,19 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 		if (mScale > 2.97f) {
 			mScale = 2.97f;
 		}
-		float factor = mScale/previousScale;
-		
+		float factor = mScale / previousScale;
+
 		View v = mChildViews.get(mCurrent);
 		if (v != null) {
 			// Work out the focus point relative to the view top left
-			int viewFocusX = (int)e.getX() - (v.getLeft() + mXScroll);
-			int viewFocusY = (int)e.getY() - (v.getTop() + mYScroll);
+			int viewFocusX = (int) e.getX() - (v.getLeft() + mXScroll);
+			int viewFocusY = (int) e.getY() - (v.getTop() + mYScroll);
 			// Scroll to maintain the focus point
 			mXScroll += viewFocusX - viewFocusX * factor;
 			mYScroll += viewFocusY - viewFocusY * factor;
 			requestLayout();
 		}
-		
+
 		return true;
 	}
 
@@ -1010,5 +1035,17 @@ public class ReaderView extends AdapterView<Adapter> implements GestureDetector.
 	@Override
 	public boolean onSingleTapConfirmed(MotionEvent e) {
 		return false;
+	}
+
+
+	public enum ScaleType {
+
+		CENTER_CROP,
+
+		FIT_CENTER,
+
+		FIT_WIDTH,
+
+		FIT_HEIGHT
 	}
 }
